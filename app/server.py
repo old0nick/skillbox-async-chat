@@ -37,13 +37,16 @@ class ServerProtocol(asyncio.Protocol):
                 else:
                     self.login = newlogin
                     self.transport.write(f"Привет, {self.login}!\r\n".encode())
-                    if len(self.server.history) > 0:
-                        self.transport.write(f"Последние сообщения:\r\n".encode())
-                        for message in self.server.history:
-                            self.transport.write(f"{message}".encode())
+                    self.send_history()
                     self.send_message(True, f"{self.login} подключился.")
             else:
                 self.transport.write("Неправильный логин\r\n".encode())
+
+    def send_history(self):
+        if len(self.server.history) > 0:
+            self.transport.write(f"Последние сообщения:\r\n".encode())
+            for message in self.server.history:
+                self.transport.write(f"{message}".encode())
 
     def connection_made(self, transport: transports.Transport):
         self.server.clients.append(self)
